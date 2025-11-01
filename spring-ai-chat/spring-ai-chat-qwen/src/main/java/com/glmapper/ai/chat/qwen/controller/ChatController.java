@@ -2,10 +2,12 @@ package com.glmapper.ai.chat.qwen.controller;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
 /**
  * @Classname ChatController
@@ -21,7 +23,7 @@ public class ChatController {
     private ChatClient chatClient;
 
     /**
-     * 普通的聊天接口
+     * 普通的聊天接口（一次性返回）
      *
      * @param userInput 用户输入
      * @return 返回内容
@@ -29,5 +31,16 @@ public class ChatController {
     @GetMapping("/chat")
     public String prompt(@RequestParam String userInput) {
         return this.chatClient.prompt().user(userInput).call().content();
+    }
+
+    /**
+     * 流式聊天接口
+     *
+     * @param userInput 用户输入
+     * @return 流式返回内容
+     */
+    @GetMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> streamPrompt(@RequestParam String userInput) {
+        return this.chatClient.prompt().user(userInput).stream().content();
     }
 }
